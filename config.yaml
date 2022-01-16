@@ -5,7 +5,7 @@ user_paths:
 
 params:
   hash_size : 8
-  threshold : 2
+  threshold : 3
 
 
 paths:
