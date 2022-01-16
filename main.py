@@ -1,23 +1,13 @@
-import cv2
 import os
+import cv2
+import hydra
 import imagehash
 from PIL import Image
 
-video_path = "./video/donpa.mp4"
 
-frames1 = "1142"
+def frame_dump(video_path, output_path, threshold, hash_size):
 
-# Make data dir to store
-def make_dir():
-    try:
-        if not os.path.exists("data"):
-            os.mkdir("data")
-
-    except OSError:
-        print("Error creating directory for data")
-
-
-def frame_dump(video_path):
+    print(f"Video Path: {video_path}")
     capture = cv2.VideoCapture(video_path)
 
     # Instantiate frame counter
@@ -28,30 +18,28 @@ def frame_dump(video_path):
         retval, frame = capture.read()
 
         if retval:
-            name = "./data/frame" + str(currentframe) + ".jpg"
+            name = f"{output_path}/frame{str(currentframe)}.jpg"
 
-            # Hashes for dupe check
+            # Calculate hash for current frame
             hash = hash_store(frame)
-            print(f"Calculated hash: {hash}")
+            print(hash)
 
+            # Add first frame to hash_set and write image
             if len(hash_set) == 0:
                 hash_set.add(hash)
                 cv2.imwrite(name, frame)
                 print("Creating..." + name)
 
             else:
+
+                # Determine if frame is different enough to write image
+
                 threshold = 3
 
                 if hash not in hash_set:
-                    distances = set()
-                    for prev_hash in hash_set:
-                        dist = abs(hash - prev_hash)
-                        distances.add(dist)
-
+                    min_dist = min_distance_calc(hash, hash_set)
                     hash_set.add(hash)
-
-                    print(f"Distances: {distances}")
-                    if min(distances) > threshold:
+                    if min_dist > threshold:
                         cv2.imwrite(name, frame)
                         print("Creating..." + name)
 
@@ -64,21 +52,52 @@ def frame_dump(video_path):
 
 
 def hash_store(frame):
+    """
+    Calculates hash from np.array/frame object from VideoCapture obj
+    """
     image = Image.fromarray(frame)
     hash = imagehash.dhash(image, hash_size=8)
     return hash
 
 
-def main():
-    print(video_path)
-    make_dir()
-    frame_dump(video_path=video_path)
+def min_distance_calc(hash, hash_set):
+    """
+    Calculates minimum distance between current frame hash and previously calculated hashes
+    """
+    distances = set()
+    for hashes in hash_set:
+        distances.add(abs(hash - hashes))
+
+    return min(distances)
+
+
+# Make data dir to store
+def make_dir(output_path):
+    """
+    Creates images directory for images to be written to
+    """
+    try:
+        if not os.path.exists(output_path):
+            print(f"Creating output directory at: {output_path}")
+            os.mkdir(output_path)
+
+    except OSError:
+        # Make output dir constant and add to msg
+        print(f"Error creating directory for images")
+
+
+@hydra.main(config_path=".", config_name="config")
+def main(cfg):
+
+    make_dir(cfg.paths.output_path)
+    frame_dump(
+        video_path=cfg.paths.video_path,
+        output_path=cfg.paths.output_path,
+        threshold=cfg.params.threshold,
+        hash_size=cfg.params.hash_size,
+    )
 
 
 if __name__ == "__main__":
     main()
 
-
-# calc distances
-# take min distance
-# if min distance > threshold, consider a new image

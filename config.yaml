@@ -1,0 +1,14 @@
+user_paths:
+  video_path: /video/test.mp4
+  output_path: /images
+
+
+params:
+  hash_size : 8
+  threshold : 2
+
+
+paths:
+    src_path: ${hydra:runtime.cwd}
+    video_path: "${paths.src_path}${user_paths.video_path}"
+    output_path: "${paths.src_path}${user_paths.output_path}"
