@@ -21,7 +21,7 @@ def frame_dump(video_path, output_path, threshold, hash_size):
             name = f"{output_path}/frame{str(currentframe)}.jpg"
 
             # Calculate hash for current frame
-            hash = hash_store(frame)
+            hash = hash_store(frame, hash_size=hash_size)
             print(hash)
 
             # Add first frame to hash_set and write image
@@ -33,8 +33,6 @@ def frame_dump(video_path, output_path, threshold, hash_size):
             else:
 
                 # Determine if frame is different enough to write image
-
-                threshold = 3
 
                 if hash not in hash_set:
                     min_dist = min_distance_calc(hash, hash_set)
@@ -51,12 +49,12 @@ def frame_dump(video_path, output_path, threshold, hash_size):
     capture.release()
 
 
-def hash_store(frame):
+def hash_store(frame, hash_size):
     """
     Calculates hash from np.array/frame object from VideoCapture obj
     """
     image = Image.fromarray(frame)
-    hash = imagehash.dhash(image, hash_size=8)
+    hash = imagehash.dhash(image, hash_size=hash_size)
     return hash
 
 
