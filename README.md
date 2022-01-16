@@ -31,3 +31,17 @@ Increasing `hash_size` is useful for more visually complex and detailed scenes; 
 Changing `threshold` directly impacts cross-frame similarity referencing, as it is the minimum amount of difference between the current frame and *any* previous frame required to save the frame to disk. This contextual amount of difference a change in threshold provides is fairly abstract, and generally varies based on the type of images contained within the source video. In short, increasing the threshold results in fewer, more different images. Decreasing threshold results in more, increasingly granular images. 
 
 If you don't want this similarity detection and only want all distinct images to be output, set `threshold : 0`. 
+
+
+TODO:
+
+    Skip duplicate checking calculation when threshold = 0. More performant obviously. 
+
+    Multiple video support using hydra's built in `--multirun` flag. 
+    
+    Output heuristics for frame similarity  
+
+    Put more stuff in functions lol
+
+    More code do more faster
+
